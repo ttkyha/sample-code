@@ -1,0 +1,36 @@
+-- Query all 'accom' pages from GA bigquery daily data set
+SELECT 					
+Date AS date
+,fullVisitorId AS visitorid
+,visitId AS visitid
+,visitNumber AS visitnumber
+,hits.hitNumber AS hitnumber
+,trafficSource.campaign AS campaign
+,trafficSource.source AS source
+,trafficSource.medium AS medium
+,trafficSource.keyword AS keyword
+,CASE WHEN hits.page.pageTitle IS NULL THEN 'N/A' ELSE hits.page.pageTitle END AS pagetitle
+,hits.page.hostname AS domain
+,hits.page.pagePath AS pagepath
+,CASE WHEN REGEXP_MATCH(hits.page.pagePath,r'\?')
+THEN REGEXP_EXTRACT(hits.page.pagePath,r'(.+)\?')
+ELSE hits.page.pagePath
+END AS pagepathuri
+,COUNT(1) AS pageviews
+FROM [__SOURCE_DATASET__.__SOURCE_TABLE__]
+WHERE REGEXP_MATCH(hits.page.pagePath, r'accom')
+AND hits.type = 'PAGE'
+GROUP BY 
+date
+,visitorid
+,visitid
+,hitnumber
+,visitnumber
+,campaign
+,source
+,medium
+,keyword
+,pagetitle
+,domain
+,pagepath
+,pagepathuri
